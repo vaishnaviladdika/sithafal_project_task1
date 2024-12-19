@@ -1,10 +1,3 @@
-"""
-Streamlit application for PDF-based Retrieval-Augmented Generation (RAG) using Ollama + LangChain.
-
-This application allows users to upload a PDF, process it,
-and then ask questions about the content using a selected language model.
-"""
-
 import streamlit as st
 import logging
 import os
@@ -24,9 +17,6 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain.retrievers.multi_query import MultiQueryRetriever
 from typing import List, Tuple, Dict, Any, Optional
 from langchain.document_loaders import PyPDFLoader
-
-# Set protobuf environment variable to avoid error messages
-# This might cause some issues with latency but it's a tradeoff
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 # Streamlit page configuration
@@ -48,32 +38,10 @@ logger = logging.getLogger(__name__)
 
 
 @st.cache_resource(show_spinner=True)
-# def extract_model_names(
-#     _models_info: Dict[str, List[Dict[str, Any]]],
-# ) -> Tuple[str, ...]:
-#     """
-#     Extract model names from the provided models information.
-
-#     Args:
-#         models_info (Dict[str, List[Dict[str, Any]]]): Dictionary containing information about available models.
-
-#     Returns:
-#         Tuple[str, ...]: A tuple of model names.
-#     """
-#     logger.info("Extracting model names from models_info")
-#     model_names = tuple(model["name"] for model in _models_info["models"])
-#     logger.info(f"Extracted model names: {model_names}")
-    
-#     return model_names
-
-# def extract_model_names(_models_info):
-#     st.write(_models_info)  # Log the structure in Streamlit
-#     return []  # Return an empty list temporarily for debugging
 
 
 
 def extract_model_names(_models_info):
-    # Access the list of models
     m=_models_info["models"]
     model_names = []
     lis=[]
@@ -86,32 +54,11 @@ def extract_model_names(_models_info):
         i+=5
     return tuple(model_names)
 
-    # models = _models_info.get("models", [])
-    
-    # # Extract model names
-    
-    # for model_entry in models:
-
-    #     # Parse the string representation to extract the model name
-    #     if "Model=" in model_entry:
-    #         start_idx = model_entry.index("model=") + len("model='")
-    #         end_idx = model_entry.index("'", start_idx)
-    #         model_names.append(model_entry[start_idx:end_idx])
-    # st.write(model_names)
-    # return model_names
 
 
 
 def create_vector_db(file_upload) -> Chroma:
-    """
-    Create a vector database from an uploaded PDF file.
-
-    Args:
-        file_upload (st.UploadedFile): Streamlit file upload object containing the PDF.
-
-    Returns:
-        Chroma: A vector store containing the processed document chunks.
-    """
+ 
     logger.info(f"Creating vector DB from file upload: {file_upload.name}")
     temp_dir = tempfile.mkdtemp()
 
@@ -141,17 +88,6 @@ def create_vector_db(file_upload) -> Chroma:
 
 
 def process_question(question: str, vector_db: Chroma, selected_model: str) -> str:
-    """
-    Process a user question using the vector database and selected language model.
-
-    Args:
-        question (str): The user's question.
-        vector_db (Chroma): The vector database containing document embeddings.
-        selected_model (str): The name of the selected language model.
-
-    Returns:
-        str: The generated response to the user's question.
-    """
     logger.info(f"Processing question: {question} using model: {selected_model}")
     
     # Initialize LLM
@@ -198,15 +134,6 @@ def process_question(question: str, vector_db: Chroma, selected_model: str) -> s
 
 @st.cache_data
 def extract_all_pages_as_images(file_upload) -> List[Any]:
-    """
-    Extract all pages from a PDF file as images.
-
-    Args:
-        file_upload (st.UploadedFile): Streamlit file upload object containing the PDF.
-
-    Returns:
-        List[Any]: A list of image objects representing each page of the PDF.
-    """
     logger.info(f"Extracting all pages as images from file: {file_upload.name}")
     pdf_pages = []
     with pdfplumber.open(file_upload) as pdf:
@@ -216,12 +143,6 @@ def extract_all_pages_as_images(file_upload) -> List[Any]:
 
 
 def delete_vector_db(vector_db: Optional[Chroma]) -> None:
-    """
-    Delete the vector database and clear related session state.
-
-    Args:
-        vector_db (Optional[Chroma]): The vector database to be deleted.
-    """
     logger.info("Deleting vector DB")
     if vector_db is not None:
         vector_db.delete_collection()
@@ -237,9 +158,6 @@ def delete_vector_db(vector_db: Optional[Chroma]) -> None:
 
 
 def main() -> None:
-    """
-    Main function to run the Streamlit application.
-    """
     st.subheader("🧠 Ollama PDF RAG playground", divider="gray", anchor=False)
 
     # Get available models
